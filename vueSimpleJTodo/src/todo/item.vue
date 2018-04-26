@@ -56,7 +56,6 @@
     bottom: 0px;
     margin: auto 0;
     border: none;
-    appearance: none;
     outline: none;    
   }
   .toggle:after {
@@ -78,7 +77,6 @@
     margin-bottom: 11px;
     transition: color 0.2s ease-out;
     background-color: transparent;
-    appearance: none;
     border-width: 0px;
     cursor: pointer;
     outline: none;

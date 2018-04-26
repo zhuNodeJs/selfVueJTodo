@@ -5,4 +5,5 @@
 <!-- 在右侧的设置中的JSON中添加： -->
 "files.autoSave": "off",
 ```
-2. 
+2. 这个工程中有两个子工程，其中VueJTodo是高级Vue课程，而VueSimpleJTodo是简易的实现课程。
+3. 
