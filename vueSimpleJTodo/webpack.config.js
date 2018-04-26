@@ -1,13 +1,15 @@
-const path = require('path');
-const HTMLPlugin = require('html-webpack-plugin'); // 动态生成html文件
-const webpack = require('webpack');
-const isDev = process.env.NODE_ENV === 'development';
+const path = require('path')
+const HTMLPlugin = require('html-webpack-plugin')
+const webpack = require('webpack')
+const ExtractPlugin = require('extract-text-webpack-plugin')
+
+const isDev = process.env.NODE_ENV === 'development'
 
 const config = {
   target: 'web',
-  entry: path.join(__dirname,'src/index.js'),
+  entry: path.join(__dirname, 'src/index.js'),
   output: {
-    filename:'bundle.js',
+    filename: 'bundle.[hash:8].js',
     path: path.join(__dirname, 'dist')
   },
   module: {
@@ -21,43 +23,20 @@ const config = {
         loader: 'babel-loader'
       },
       {
-        test: /\.css$/,
-        use: [
-          "style-loader", // 将css文件插入到style中
-          "css-loader" // 读取css文件
-        ]
-      },
-      {
         test: /\.(gif|jpg|jpeg|png|svg)$/,
         use: [
           {
             loader: 'url-loader',
             options: {
               limit: 1024,
-              name: '[name]-aa.[ext]' // name表示传入的文件的名字, ext显示文件的扩展名
+              name: '[name]-aaa.[ext]'
             }
           }
-        ]
-      },
-      {
-        test:/\.styl$/,
-        use: [
-          "style-loader",
-          "css-loader",
-          {
-            loader: 'postcss-loader',
-            options: {
-              sourceMap: true
-            }
-          },
-          "stylus-loader"
         ]
       }
     ]
   },
   plugins: [
-    // 定义可在全局使用的常量,在这里定义，在js工程中可以引用
-    // 记住在单引号中要加入双引号
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: isDev ? '"development"' : '"production"'
@@ -67,22 +46,67 @@ const config = {
   ]
 }
 
-if (isDev) { // 如果是开发环境
-  config.devtool = '#cheap-module-inline-source-map'; // 效率高，正确性高一点
+if (isDev) {
+  config.module.rules.push({
+    test: /\.styl/,
+    use: [
+      'style-loader',
+      'css-loader',
+      {
+        loader: 'postcss-loader',
+        options: {
+          sourceMap: true,
+        }
+      },
+      'stylus-loader'
+    ]
+  })
+  config.devtool = '#cheap-module-eval-source-map'
   config.devServer = {
-    port: 8005, // 启动的服务的端口
-    host: '0.0.0.0', // 即可以使用127.0.0.1也可以通过内网IP进行访问
-    overlay: { // 编译有错误，显示在网页上
-      errors: true
+    port: 8008,
+    host: '0.0.0.0',
+    overlay: {
+      errors: true,
     },
-    //open: true, // 启动编译的时候自动打开浏览器, 即打开一个新的浏览器页面    
-    hot: true // 更改组件的代码，只更新当前组件, 不是整个页面都加载
-  };
+    hot: true
+  }
   config.plugins.push(
-    new webpack.HotModuleReplacementPlugin(), // 局部更新内容的插件, 功能的插件
-    new webpack.NoEmitOnErrorsPlugin(), // 有编译错误时忽略发出的语句
-    new webpack.NamedModulesPlugin()
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.NoEmitOnErrorsPlugin()
+  )
+} else {
+  config.entry = {
+    app: path.join(__dirname, 'src/index.js'),
+    vendor: ['vue']
+  }
+  config.output.filename = '[name].[chunkhash:8].js'
+  config.module.rules.push(
+    {
+      test: /\.styl/,
+      use: ExtractPlugin.extract({
+        fallback: 'style-loader',
+        use: [
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              sourceMap: true,
+            }
+          },
+          'stylus-loader'
+        ]
+      })
+    },
+  )
+  config.plugins.push(
+    new ExtractPlugin('styles.[contentHash:8].css'),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor'
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'runtime'
+    })
   )
 }
 
-module.exports = config;
+module.exports = config
