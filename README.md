@@ -6,4 +6,8 @@
 "files.autoSave": "off",
 ```
 2. 这个工程中有两个子工程，其中VueJTodo是高级Vue课程，而VueSimpleJTodo是简易的实现课程。
-3. 
+3. vue-cli中的static和src/assets的区别：
+static/目录下的文件并不会被webpack处理: 他们会直接被复制到最终的打包目录(默认是dist/static)下。
+```
+<link rel="stylesheet" href="static/css/reset.css">
+```
